@@ -6,13 +6,8 @@
 
 <p align="center"><b>This is the snap for GitHub Desktop</b>, <i>"simple GitHub collaboration from your desktop"</i>. It works on Ubuntu, Fedora, Debian, and other major Linux distributions.</p>
 
-<!-- Uncomment and modify this when you are provided a build status badge
 <p align="center">
 <a href="https://build.snapcraft.io/user/snapcrafters/github-desktop"><img src="https://build.snapcraft.io/badge/snapcrafters/github-desktop.svg" alt="Snap Status"></a>
-</p>
--->
-<p align="center">
-<a href="https://github.com/canonical-websites/build.snapcraft.io/issues/875">Bug #875</a>
 </p>
 
 ## Install
