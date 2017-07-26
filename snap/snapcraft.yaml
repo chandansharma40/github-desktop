@@ -1,5 +1,5 @@
 name: github-desktop
-version: 0.6.3-beta1
+version: 0.7.0
 summary: Extend your GitHub workflow beyond your browser with GitHub Desktop
 description: |
  Extend your GitHub workflow beyond your browser with our Desktop,
@@ -12,7 +12,7 @@ confinement: devmode
 parts:
   github-desktop:
     plugin: dump
-    source: https://github.com/gengjiawen/desktop/releases/download/v0.6.3-beta1/desktop_0.6.3-beta1_amd64.deb
+    source: https://github.com/gengjiawen/desktop/releases/download/v0.7.0/desktop_0.7.0_amd64.deb
     source-type: deb
     # Correct path to icon.
     prepare: |
