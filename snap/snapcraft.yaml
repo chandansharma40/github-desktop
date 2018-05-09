@@ -7,7 +7,7 @@ description: |
  experience that's completely open source and ready to customize.
 
 grade: stable
-confinement: devmode
+confinement: strict
 
 parts:
   github-desktop:
@@ -15,30 +15,44 @@ parts:
     source: https://github.com/gengjiawen/desktop/releases/download/v1.0.4-beta0/desktop_1.0.4-beta0_amd64.deb
     source-type: deb
     # Correct path to icon.
+    # Clear the execstack - https://forum.snapcraft.io/t/snap-and-executable-stacks/1812
+    # execstack --clear-execstack opt/GithubDesktop/desktop
     prepare: |
       sed -i 's|Icon=desktop|Icon=/usr/share/icons/hicolor/256x256/apps/desktop\.png|g' usr/share/applications/desktop.desktop
     after:
       - desktop-gtk2
+    build-packages:
+      - execstack
     stage-packages:
-      - gconf2
       - libasound2
+      - libgconf2-4
       - libgl1-mesa-glx
       - libglu1-mesa
       - libnotify4
       - libnspr4
       - libnss3
+      - libpcre3
       - libpulse0
       - libxss1
       - libxtst6
-  #electron-launch:
-  #  plugin: dump
-  #  source: .
-  #  organize:
-  #    electron-launch: bin/electron-launch
 
 apps:
   github-desktop:
-    # Correct the TMPDIR path for Chromium Framework/Electron to
-    # ensure libappindicator has readable resources.
-    command: env TMPDIR=$XDG_RUNTIME_DIR PATH=/usr/local/bin:${PATH} ${SNAP}/bin/desktop-launch $SNAP/opt/GithubDesktop/desktop
+    command: bin/desktop-launch $SNAP/opt/GithubDesktop/desktop
     desktop: usr/share/applications/desktop.desktop
+    # Correct the TMPDIR path for Chromium Framework/Electron to ensure
+    # libappindicator has readable resources.
+    environment:
+      TMPDIR: $XDG_RUNTIME_DIR
+    plugs:
+      - bluez
+      - browser-support
+      - gsettings
+      - home
+      - mount-observe
+      - network
+      - opengl
+      - pulseaudio
+      - unity7
+      - wayland
+      - x11
