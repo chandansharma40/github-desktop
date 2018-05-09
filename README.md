@@ -12,10 +12,18 @@
 
 ## Install
 
-    sudo apt install snapd-xdg-open
-    sudo snap install github-desktop --devmode --edge
-
+    snap install github-desktop --beta
+    snap connect github-desktop:ssh-keys
+    snap connect github-desktop:gpg-keys
 ([Don't have snapd installed?](https://snapcraft.io/docs/core/install))
+
+### Current issues
+
+```
+May  9 17:03:35 skull kernel: [286225.979306] audit: type=1107 audit(1525881815.451:2299): pid=2101 uid=103 auid=4294967295 ses=4294967295 msg='apparmor="DENIED" operation="dbus_method_call"  bus="system" path="/" interface="org.freedesktop.DBus.ObjectManager" member="GetManagedObjects" mask="send" name="org.bluez" pid=13598 label="snap.github-desktop.github-desktop" peer_pid=2127 peer_label="unconfined"
+May  9 17:03:35 skull kernel: [286225.979306]  exe="/usr/bin/dbus-daemon" sauid=103 hostname=? addr=? terminal=?'
+May  9 17:03:35 skull kernel: [286226.067051] audit: type=1400 audit(1525881815.539:2300): apparmor="DENIED" operation="open" profile="snap.github-desktop.github-desktop" name="/sys/devices/system/memory/block_size_bytes" pid=13847 comm="desktop" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+```
 
 <!-- Uncomment and modify this when you have a screenshot
 ![GitHub Desktop](screenshot.png?raw=true "GitHub Desktop")
