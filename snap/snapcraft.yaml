@@ -1,5 +1,6 @@
 name: github-desktop
-version: 1.0.4-beta0
+version: latest
+version-script: cat $SNAPCRAFT_STAGE/version
 summary: Extend your GitHub workflow beyond your browser with GitHub Desktop
 description: |
  Extend your GitHub workflow beyond your browser with our Desktop,
@@ -11,19 +12,40 @@ confinement: strict
 
 parts:
   github-desktop:
-    plugin: dump
-    source: https://github.com/gengjiawen/desktop/releases/download/v1.0.4-beta0/desktop_1.0.4-beta0_amd64.deb
-    source-type: deb
-    # Correct path to icon.
-    # Clear the execstack - https://forum.snapcraft.io/t/snap-and-executable-stacks/1812
-    # execstack --clear-execstack opt/GithubDesktop/desktop
-    prepare: |
-      sed -i 's|Icon=desktop|Icon=/usr/share/icons/hicolor/256x256/apps/desktop\.png|g' usr/share/applications/desktop.desktop
+    plugin: nil
+    override-build: |
+      snapcraftctl build
+      # Get the latest releases json
+      echo "Get GitHub releases..."
+      wget --quiet https://api.github.com/repos/shiftkey/desktop/releases -O releases.json
+      # Get the version from the tag_name and the download URL.
+      VERSION=$(jq . releases.json | grep tag_name | cut -d'"' -f4 | sed s'/release-//' | head -n 1)
+      DEB_URL=$(grep browser_download releases.json | grep "${VERSION}" | grep deb | cut -d'"' -f4)
+      DEB=$(basename "${DEB_URL}")
+      echo "Downloading ${DEB_URL}..."
+      wget --quiet "${DEB_URL}" -O "${SNAPCRAFT_PART_INSTALL}/${DEB}"
+      echo "Unpacking ${DEB}..."
+      dpkg -x "${SNAPCRAFT_PART_INSTALL}/${DEB}" ${SNAPCRAFT_PART_INSTALL}
+      rm -f releases.json 2>/dev/null
+      rm -f "${SNAPCRAFT_PART_INSTALL}/${DEB}" 2>/dev/null
+      echo $VERSION > $SNAPCRAFT_STAGE/version
+
+      # Rename the .desktop file to something sensible.
+      mv ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/desktop.desktop ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/github-desktop.desktop
+      # Correct path to icon.
+      sed -i 's|Icon=desktop|Icon=/usr/share/icons/hicolor/256x256/apps/desktop\.png|g' ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/github-desktop.desktop
     after:
       - desktop-gtk2
     build-packages:
-      - execstack
+      # GitHub Desktop debs are only available for amd64.
+      # Fail builds on other architectures
+      - on amd64:
+        - jq
+        - wget
+      - else fail
     stage-packages:
+      - git
+      - gnupg2
       - libasound2
       - libgconf2-4
       - libgl1-mesa-glx
@@ -35,24 +57,28 @@ parts:
       - libpulse0
       - libxss1
       - libxtst6
+      - openssh-client
 
 apps:
   github-desktop:
-    command: bin/desktop-launch $SNAP/opt/GithubDesktop/desktop
-    desktop: usr/share/applications/desktop.desktop
+    command: bin/desktop-launch $SNAP/opt/GitHubDesktop/desktop
+    desktop: usr/share/applications/github-desktop.desktop
     # Correct the TMPDIR path for Chromium Framework/Electron to ensure
     # libappindicator has readable resources.
     environment:
       TMPDIR: $XDG_RUNTIME_DIR
     plugs:
-      - bluez
       - browser-support
+      - desktop
+      - desktop-legacy
+      - gpg-keys
       - gsettings
       - home
       - mount-observe
       - network
       - opengl
       - pulseaudio
+      - ssh-keys
       - unity7
       - wayland
       - x11
